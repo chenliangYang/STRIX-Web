@@ -1,0 +1,1 @@
+"""STRIX Web Backend Application."""
