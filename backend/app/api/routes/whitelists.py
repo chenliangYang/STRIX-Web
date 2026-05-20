@@ -38,9 +38,9 @@ def whitelist_to_dict(wl) -> dict:
 async def get_whitelists(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    name: str = None,
-    target_type: str = None,
-    status: str = None,
+    name: str = Query(None, alias="name"),
+    targetType: str = Query(None, alias="targetType"),
+    status: str = Query(None, alias="status"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_admin),
 ):
@@ -48,7 +48,7 @@ async def get_whitelists(
     whitelists, total = WhitelistService.get_whitelists(
         db=db,
         name=name,
-        target_type=target_type,
+        target_type=targetType,
         status=status,
         page=page,
         page_size=page_size,

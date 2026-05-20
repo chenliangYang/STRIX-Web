@@ -154,11 +154,96 @@ onMounted(() => {
 <style scoped>
 .audit-logs {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .filters {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* Card */
+.audit-logs :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.audit-logs :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.audit-logs :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Table */
+.audit-logs :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.audit-logs :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Pagination */
+.audit-logs :deep(.el-pagination) {
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-pagination button),
+.audit-logs :deep(.el-pager li) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-pager li:hover),
+.audit-logs :deep(.el-pager li.is-active) {
+  color: #58a6ff !important;
+}
+
+/* Input & Select */
+.audit-logs :deep(.el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.audit-logs :deep(.el-input__inner) {
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-select .el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+}
+
+.audit-logs :deep(.el-select-dropdown) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.audit-logs :deep(.el-select-dropdown__item) {
+  color: #e6edf3 !important;
+}
+
+.audit-logs :deep(.el-select-dropdown__item:hover) {
+  background: rgba(59, 130, 246, 0.1) !important;
 }
 </style>

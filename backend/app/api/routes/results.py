@@ -21,9 +21,14 @@ router = APIRouter(prefix="/results", tags=["results"])
 def get_results(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    taskName: str = Query(None, description="Filter by task name"),
-    status: str = Query(None, description="Filter by status"),
-    riskLevel: str = Query(None, description="Filter by risk level"),
+    taskName: str = Query(None, alias="taskName", description="Filter by task name"),
+    status: str = Query(None, alias="status", description="Filter by status"),
+    riskLevel: str = Query(None, alias="riskLevel", description="Filter by risk level"),
+    startedAtStart: str = Query(None, alias="startedAtStart", description="Filter by start date"),
+    startedAtEnd: str = Query(None, alias="startedAtEnd", description="Filter by end date"),
+    createdBy: str = Query(None, alias="createdBy", description="Filter by creator"),
+    sortBy: str = Query("startedAt", alias="sortBy", description="Sort field"),
+    sortOrder: str = Query("desc", alias="sortOrder", description="Sort order"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -42,10 +47,28 @@ def get_results(
             query = query.filter(Result.status == status)
         if riskLevel:
             query = query.filter(Result.risk_level == riskLevel)
+        if startedAtStart:
+            query = query.filter(Result.started_at >= startedAtStart)
+        if startedAtEnd:
+            query = query.filter(Result.started_at <= startedAtEnd)
+        if createdBy:
+            query = query.filter(Task.created_by == createdBy)
+
+        # Apply sorting
+        sort_column = Result.started_at
+        if sortBy == "createdAt":
+            sort_column = Result.created_at
+        elif sortBy == "riskLevel":
+            sort_column = Result.risk_level
+
+        if sortOrder == "asc":
+            query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(sort_column.desc())
 
         total = query.count()
         offset = (page - 1) * page_size
-        results = query.order_by(Result.created_at.desc()).offset(offset).limit(page_size).all()
+        results = query.offset(offset).limit(page_size).all()
 
         items = []
         for result, task in results:

@@ -261,3 +261,36 @@ async def disable_user(
         message="用户已禁用",
         data=user_to_dict(user),
     )
+
+
+@router.post("/{target_user_id}/reset-password", response_model=ResponseData)
+async def reset_password(
+    request: Request,
+    target_user_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_admin),
+):
+    """Reset user password (admin only)."""
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
+
+    new_password = UserService.reset_password(db, target_user_id)
+
+    # Log audit
+    AuditService.log(
+        db=db,
+        action="reset_password",
+        actor_id=user_id,
+        actor_account=user_account,
+        actor_role=user_role,
+        object_type="user",
+        object_id=target_user_id,
+        request_ip=request.client.host if request.client else None,
+    )
+
+    return ResponseData(
+        code=0,
+        message="密码已重置为: 123456",
+        data={"password": new_password},
+    )

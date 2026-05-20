@@ -303,6 +303,8 @@ onUnmounted(() => {
 <style scoped>
 .run-detail {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .header-actions {
@@ -315,38 +317,38 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #f0f6fc;
 }
 
 .events-container {
   max-height: 500px;
   overflow-y: auto;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: rgba(13, 17, 23, 0.8);
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .event-item {
   padding: 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
   border-left: 3px solid transparent;
 }
 
 .event-item.event-scan_start {
-  border-left-color: #409eff;
-  background: #f0f7ff;
+  border-left-color: #58a6ff;
 }
 
 .event-item.event-vulnerability_found {
-  border-left-color: #f56c6c;
-  background: #fef0f0;
+  border-left-color: #f85149;
 }
 
 .event-item.event-scan_complete {
-  border-left-color: #67c23a;
-  background: #f0f9eb;
+  border-left-color: #3fb950;
 }
 
 .event-item.event-scan_error {
-  border-left-color: #e6a23c;
-  background: #fdf6ec;
+  border-left-color: #d29922;
 }
 
 .event-header {
@@ -357,31 +359,33 @@ onUnmounted(() => {
 }
 
 .event-time {
-  color: #999;
+  color: #8b949e;
   font-size: 12px;
 }
 
 .event-type {
   font-weight: bold;
   font-size: 13px;
+  color: #e6edf3;
 }
 
-.type-scan_start { color: #409eff; }
-.type-port_scan { color: #909399; }
-.type-vulnerability_found { color: #f56c6c; }
-.type-scan_progress { color: #e6a23c; }
-.type-scan_complete { color: #67c23a; }
-.type-scan_error { color: #f56c6c; }
+.type-scan_start { color: #58a6ff; }
+.type-port_scan { color: #8b949e; }
+.type-vulnerability_found { color: #f85149; }
+.type-scan_progress { color: #d29922; }
+.type-scan_complete { color: #3fb950; }
+.type-scan_error { color: #f85149; }
 
 .event-payload {
   margin: 0;
   padding: 10px;
-  background: #f5f7fa;
+  background: rgba(22, 27, 34, 0.8);
   border-radius: 4px;
   font-size: 12px;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
+  color: #e6edf3;
 }
 
 .waiting-events {
@@ -390,6 +394,54 @@ onUnmounted(() => {
   justify-content: center;
   gap: 8px;
   padding: 20px;
-  color: #909399;
+  color: #8b949e;
+}
+
+/* Card */
+.run-detail :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.run-detail :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.run-detail :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Descriptions */
+.run-detail :deep(.el-descriptions__label),
+.run-detail :deep(.el-descriptions__content),
+.run-detail :deep(.el-descriptions-item__cell) {
+  background: rgba(22, 27, 34, 0.6) !important;
+  color: #e6edf3 !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Table */
+.run-detail :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.run-detail :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.run-detail :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.run-detail :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
 }
 </style>

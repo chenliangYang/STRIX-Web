@@ -33,11 +33,11 @@ def audit_log_to_dict(log) -> dict:
 async def get_audit_logs(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    actor: str = None,
-    action: str = None,
-    result: str = None,
-    created_at_start: str = None,
-    created_at_end: str = None,
+    actor: str = Query(None, alias="actor"),
+    action: str = Query(None, alias="action"),
+    result: str = Query(None, alias="result"),
+    createdAtStart: str = Query(None, alias="createdAtStart"),
+    createdAtEnd: str = Query(None, alias="createdAtEnd"),
     db: Session = Depends(get_db),
     user_id: str = Depends(require_admin),
 ):
@@ -50,10 +50,10 @@ async def get_audit_logs(
         query = query.filter(AuditLog.action == action)
     if result:
         query = query.filter(AuditLog.result == result)
-    if created_at_start:
-        query = query.filter(AuditLog.created_at >= created_at_start)
-    if created_at_end:
-        query = query.filter(AuditLog.created_at <= created_at_end)
+    if createdAtStart:
+        query = query.filter(AuditLog.created_at >= createdAtStart)
+    if createdAtEnd:
+        query = query.filter(AuditLog.created_at <= createdAtEnd)
 
     total = query.count()
     offset = (page - 1) * page_size

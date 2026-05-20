@@ -126,11 +126,69 @@ onMounted(() => {
 <style scoped>
 .task-runs {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #f0f6fc;
+}
+
+/* Card */
+.task-runs :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-runs :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.task-runs :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Table */
+.task-runs :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.task-runs :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-runs :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.task-runs :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Pagination */
+.task-runs :deep(.el-pagination) {
+  color: #e6edf3 !important;
+}
+
+.task-runs :deep(.el-pagination button),
+.task-runs :deep(.el-pager li) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  color: #e6edf3 !important;
+}
+
+.task-runs :deep(.el-pager li:hover),
+.task-runs :deep(.el-pager li.is-active) {
+  color: #58a6ff !important;
 }
 </style>

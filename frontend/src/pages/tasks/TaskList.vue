@@ -484,17 +484,139 @@ onUnmounted(() => {
 <style scoped>
 .task-list {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #f0f6fc;
 }
 
 .filters {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* Card */
+.task-list :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-list :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.task-list :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Table */
+.task-list :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.task-list :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-list :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.task-list :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Pagination */
+.task-list :deep(.el-pagination) {
+  color: #e6edf3 !important;
+}
+
+.task-list :deep(.el-pagination button),
+.task-list :deep(.el-pager li) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  color: #e6edf3 !important;
+}
+
+.task-list :deep(.el-pager li:hover),
+.task-list :deep(.el-pager li.is-active) {
+  color: #58a6ff !important;
+}
+
+/* Dialog */
+.task-list :deep(.el-dialog) {
+  background: rgba(22, 27, 34, 0.98) !important;
+}
+
+.task-list :deep(.el-dialog__title) {
+  color: #f0f6fc !important;
+}
+
+.task-list :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-list :deep(.el-dialog__body) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  color: #e6edf3 !important;
+}
+
+/* Form */
+.task-list :deep(.el-form-item__label) {
+  color: #8b949e !important;
+}
+
+.task-list :deep(.el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.task-list :deep(.el-input__inner) {
+  color: #e6edf3 !important;
+}
+
+/* Textarea */
+.task-list :deep(.el-textarea__inner) {
+  background: rgba(13, 17, 23, 0.8) !important;
+  color: #e6edf3 !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: none !important;
+}
+
+/* Select */
+.task-list :deep(.el-select .el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+}
+
+.task-list :deep(.el-select-dropdown) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.task-list :deep(.el-select-dropdown__item) {
+  color: #e6edf3 !important;
+}
+
+.task-list :deep(.el-select-dropdown__item:hover) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Switch */
+.task-list :deep(.el-switch) {
+  --el-switch-off-color: rgba(59, 130, 246, 0.3) !important;
 }
 </style>

@@ -287,11 +287,139 @@ onMounted(() => {
 <style scoped>
 .user-management {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #f0f6fc;
+}
+
+/* Card */
+.user-management :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.user-management :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.user-management :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Table */
+.user-management :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.user-management :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Pagination */
+.user-management :deep(.el-pagination) {
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-pagination button) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-pager li) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-pager li:hover) {
+  color: #58a6ff !important;
+}
+
+.user-management :deep(.el-pager li.is-active) {
+  color: #58a6ff !important;
+}
+
+/* Dialog */
+.user-management :deep(.el-dialog) {
+  background: rgba(22, 27, 34, 0.98) !important;
+}
+
+.user-management :deep(.el-dialog__title) {
+  color: #f0f6fc !important;
+}
+
+.user-management :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.user-management :deep(.el-dialog__body) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  color: #e6edf3 !important;
+}
+
+/* Form */
+.user-management :deep(.el-form-item__label) {
+  color: #8b949e !important;
+}
+
+.user-management :deep(.el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.user-management :deep(.el-input__inner) {
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-input__inner::placeholder) {
+  color: #6e7681 !important;
+}
+
+/* Select */
+.user-management :deep(.el-select) {
+  width: 100%;
+}
+
+.user-management :deep(.el-select .el-input__wrapper) {
+  background: rgba(13, 17, 23, 0.8) !important;
+}
+
+.user-management :deep(.el-select-dropdown) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.user-management :deep(.el-select-dropdown__item) {
+  color: #e6edf3 !important;
+}
+
+.user-management :deep(.el-select-dropdown__item:hover) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.user-management :deep(.el-select-dropdown__item.selected) {
+  color: #58a6ff !important;
 }
 </style>

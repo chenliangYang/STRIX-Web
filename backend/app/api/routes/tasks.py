@@ -43,15 +43,15 @@ async def get_tasks(
     request: Request,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    name: str = None,
-    target: str = None,
-    scan_mode: str = None,
-    interactive: bool = None,
-    status: str = None,
-    risk_level: str = None,
-    created_by: str = None,
-    created_at_start: str = None,
-    created_at_end: str = None,
+    name: str = Query(None, alias="name"),
+    target: str = Query(None, alias="target"),
+    scanMode: str = Query(None, alias="scanMode"),
+    interactive: bool = Query(None, alias="interactive"),
+    status: str = Query(None, alias="status"),
+    riskLevel: str = Query(None, alias="riskLevel"),
+    createdBy: str = Query(None, alias="createdBy"),
+    createdAtStart: str = Query(None, alias="createdAtStart"),
+    createdAtEnd: str = Query(None, alias="createdAtEnd"),
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
@@ -62,19 +62,19 @@ async def get_tasks(
     is_admin = user.role == "admin"
 
     if not is_admin:
-        created_by = user_id
+        createdBy = user_id
 
     tasks, total = TaskService.get_tasks(
         db=db,
         name=name,
         target=target,
-        scan_mode=scan_mode,
+        scan_mode=scanMode,
         interactive=interactive,
         status=status,
-        risk_level=risk_level,
-        created_by=created_by,
-        created_at_start=created_at_start,
-        created_at_end=created_at_end,
+        risk_level=riskLevel,
+        created_by=createdBy,
+        created_at_start=createdAtStart,
+        created_at_end=createdAtEnd,
         page=page,
         page_size=page_size,
     )
