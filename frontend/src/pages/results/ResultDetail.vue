@@ -227,20 +227,123 @@ onMounted(() => {
 <style scoped>
 .result-detail {
   padding: 20px;
+  background: #0d1117;
+  min-height: 100%;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #f0f6fc;
 }
 
+/* Card 样式 */
+.result-detail :deep(.el-card) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-card__header) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+}
+
+.result-detail :deep(.el-card__body) {
+  background: rgba(22, 27, 34, 0.9) !important;
+  color: #e6edf3 !important;
+}
+
+/* Descriptions 样式 */
+.result-detail :deep(.el-descriptions) {
+  background: transparent !important;
+}
+
+.result-detail :deep(.el-descriptions__label) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-descriptions__content) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-descriptions-item) {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-descriptions-item__cell) {
+  background: transparent !important;
+}
+
+/* 摘要区域 */
+.result-detail :deep(.summary-section) {
+  color: #e6edf3 !important;
+}
+
+.result-detail h4 {
+  color: #f0f6fc !important;
+}
+
+.result-detail p {
+  color: #e6edf3 !important;
+}
+
+/* Table in ResultDetail */
+.result-detail :deep(.el-table) {
+  background: transparent !important;
+  color: #e6edf3 !important;
+}
+
+.result-detail :deep(.el-table th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #8b949e !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-table td) {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
+  color: #e6edf3 !important;
+}
+
+.result-detail :deep(.el-table__body-wrapper tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Dialog */
+.result-detail :deep(.el-dialog) {
+  background: rgba(22, 27, 34, 0.98) !important;
+}
+
+.result-detail :deep(.el-dialog__title) {
+  color: #f0f6fc !important;
+}
+
+.result-detail :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.result-detail :deep(.el-dialog__body) {
+  background: rgba(22, 27, 34, 0.98) !important;
+  color: #e6edf3 !important;
+}
+
+/* Markdown 内容 */
 .markdown-content {
   max-height: 60vh;
   overflow-y: auto;
+  padding: 16px;
+  background: rgba(13, 17, 23, 0.8);
+  border-radius: 8px;
 }
 
 .markdown-content h2 {
   margin-bottom: 20px;
+  color: #f0f6fc !important;
 }
 </style>

@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user
+from app.api.auth_deps import assert_run_access, assert_task_access
 from app.core.errors import StrixWebException
-from app.models import User
 from app.schemas.common import ResponseData, PaginatedData, PaginatedResponse
 from app.schemas.task_run import TaskRunResponse, RunEventResponse
 from app.services.run_service import RunService
@@ -19,11 +19,14 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 def stop_run(
     run_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Stop a running task."""
     try:
-        success = RunService.stop_task(db, run_id, current_user.id)
+        # Check access permission
+        run = assert_run_access(db, run_id, current_user)
+
+        success = RunService.stop_task(db, run_id, current_user.get("sub"))
         return {
             "code": 0,
             "message": "ok" if success else "failed",
@@ -39,11 +42,13 @@ def stop_run(
 def get_run(
     run_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get a run by ID."""
     try:
-        run = RunService.get_run_by_id(db, run_id)
+        # Check access permission
+        run = assert_run_access(db, run_id, current_user)
+
         run_dict = {
             "id": run.id,
             "task_id": run.task_id,
@@ -80,10 +85,13 @@ def get_run_events(
     seq_after: int = Query(0, description="Only return events with seq > seq_after"),
     limit: int = Query(100, ge=1, le=1000, description="Max events to return"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get events for a run."""
     try:
+        # Check access permission
+        assert_run_access(db, run_id, current_user)
+
         events = RunService.get_run_events(db, run_id, seq_after, limit)
         return {
             "code": 0,
@@ -106,12 +114,15 @@ def get_task_runs(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get runs for a task."""
     try:
+        # Check access permission to the task
+        assert_task_access(db, task_id, current_user)
+
         runs, total = RunService.get_runs_by_task(db, task_id, page, page_size)
-        
+
         # Convert ORM objects to dicts
         run_items = []
         for r in runs:
@@ -135,7 +146,7 @@ def get_task_runs(
                 "updated_at": r.updated_at,
             }
             run_items.append(TaskRunResponse.model_validate(run_dict))
-        
+
         return {
             "code": 0,
             "message": "ok",

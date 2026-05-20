@@ -29,6 +29,25 @@ def verify_ws_token(token: str) -> Optional[dict]:
         return None
 
 
+def check_run_access(run_id: str, user: dict, db: Session) -> bool:
+    """
+    Check if user has access to the run.
+    Admin can access any run, regular users can only access runs of their own tasks.
+    """
+    from app.models import TaskRun, Task
+    from app.core.enums import UserRole
+
+    is_admin = user.get("role") == UserRole.ADMIN.value
+    if is_admin:
+        return True
+
+    run = db.query(TaskRun).filter(TaskRun.id == run_id).first()
+    if not run:
+        return False
+
+    return run.created_by == user.get("sub")
+
+
 class ConnectionManager:
     """Manages WebSocket connections."""
 
@@ -80,21 +99,32 @@ async def websocket_run_events(
 
     Connect: ws://host/ws/runs/{run_id}/events?token={jwt_token}
     """
-    if token:
-        try:
-            from app.services.auth_service import AuthService
-            db_gen = get_db()
-            db = next(db_gen)
-            user = AuthService.verify_token(token)
-            if not user:
-                await websocket.close(code=4001, reason="Unauthorized")
-                return
-        except Exception as e:
-            logger.warning(f"WebSocket auth failed: {e}")
+    # Token verification is mandatory
+    if not token:
+        await websocket.close(code=4001, reason="Token required")
+        return
+
+    try:
+        from app.services.auth_service import AuthService
+        from app.db.session import get_db as _get_db
+
+        user = AuthService.verify_token(token)
+        if not user:
             await websocket.close(code=4001, reason="Unauthorized")
             return
-    else:
-        await websocket.close(code=4001, reason="Token required")
+
+        # Verify run access permission
+        db_gen = _get_db()
+        db = next(db_gen)
+        try:
+            if not check_run_access(run_id, user, db):
+                await websocket.close(code=4003, reason="Access denied")
+                return
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"WebSocket auth failed: {e}")
+        await websocket.close(code=4001, reason="Unauthorized")
         return
 
     await manager.connect(websocket, run_id)
@@ -149,10 +179,22 @@ async def websocket_terminal(
     """
     try:
         from app.services.auth_service import AuthService
+        from app.db.session import get_db as _get_db
+
         user = AuthService.verify_token(token)
         if not user:
             await websocket.close(code=4001, reason="Unauthorized")
             return
+
+        # Verify run access permission
+        db_gen = _get_db()
+        db = next(db_gen)
+        try:
+            if not check_run_access(run_id, user, db):
+                await websocket.close(code=4003, reason="Access denied")
+                return
+        finally:
+            db.close()
     except Exception as e:
         await websocket.close(code=4001, reason="Unauthorized")
         return

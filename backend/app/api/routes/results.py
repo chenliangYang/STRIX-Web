@@ -1,11 +1,16 @@
 """Results API routes."""
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db, get_current_user
+from app.api.auth_deps import (
+    is_admin as is_admin_check,
+    assert_result_access,
+    assert_vulnerability_access,
+)
 from app.core.errors import StrixWebException
-from app.models import User, Result, Vulnerability, Task
+from app.models import Result, Vulnerability, Task
 from app.schemas.common import ResponseData, PaginatedData, PaginatedResponse
 from app.schemas.task_run import TaskRunResponse
 
@@ -20,11 +25,16 @@ def get_results(
     status: str = Query(None, description="Filter by status"),
     riskLevel: str = Query(None, description="Filter by risk level"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get scan results list."""
     try:
         query = db.query(Result, Task).join(Task, Result.task_id == Task.id)
+
+        # Apply user scope filter
+        if not is_admin_check(current_user):
+            user_id = current_user.get("sub")
+            query = query.filter(Task.created_by == user_id)
 
         if taskName:
             query = query.filter(Task.name.like(f"%{taskName}%"))
@@ -72,15 +82,13 @@ def get_results(
 def get_result(
     result_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get result detail."""
     try:
-        result = db.query(Result).filter(Result.id == result_id).first()
-        if not result:
-            raise StrixWebException("结果不存在", code=40400)
-
-        task = db.query(Task).filter(Task.id == result.task_id).first()
+        # Check access permission
+        result = assert_result_access(db, result_id, current_user)
+        task = result.task
 
         return {
             "code": 0,
@@ -109,13 +117,12 @@ def get_result_vulnerabilities(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get vulnerabilities for a result."""
     try:
-        result = db.query(Result).filter(Result.id == result_id).first()
-        if not result:
-            raise StrixWebException("结果不存在", code=40400)
+        # Check access permission to the result
+        assert_result_access(db, result_id, current_user)
 
         query = db.query(Vulnerability).filter(Vulnerability.result_id == result_id)
         total = query.count()
@@ -159,38 +166,19 @@ def get_result_vulnerabilities(
 def get_vulnerability_markdown(
     vuln_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """Get vulnerability markdown content."""
     try:
-        vuln = db.query(Vulnerability).filter(Vulnerability.id == vuln_id).first()
-        if not vuln:
-            raise StrixWebException("漏洞不存在", code=40400)
+        # Check access permission
+        vuln = assert_vulnerability_access(db, vuln_id, current_user)
 
-        if not vuln.markdown_path:
-            raise StrixWebException("漏洞报告文件不存在", code=40400)
+        # Read markdown content from raw_json if markdown_path is not set
+        if not vuln.raw_json or not vuln.raw_json.get("content_preview"):
+            raise StrixWebException("漏洞报告内容不存在", code=40400)
 
-        # Security: validate path is within allowed directory
-        from pathlib import Path
-        from app.core.config import get_settings
-        settings = get_settings()
-
-        base_dir = Path(settings.runs_dir)
-        file_path = base_dir / vuln.markdown_path
-
-        # Ensure the file is within the base directory
-        try:
-            file_path = file_path.resolve()
-            base_dir = base_dir.resolve()
-            if not str(file_path).startswith(str(base_dir)):
-                raise StrixWebException("无效的文件路径", code=40300)
-        except Exception:
-            raise StrixWebException("无效的文件路径", code=40300)
-
-        if not file_path.exists():
-            raise StrixWebException("文件不存在", code=40400)
-
-        content = file_path.read_text(encoding="utf-8")
+        # Get content from raw_json
+        content = vuln.raw_json.get("content_preview", "")
 
         return {
             "code": 0,
