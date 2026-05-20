@@ -35,7 +35,7 @@ async def get_users(
     role: str = None,
     status: str = None,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Get user list (admin only)."""
     users, total = UserService.get_users(
@@ -62,7 +62,7 @@ async def get_users(
 async def get_user(
     target_user_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Get user detail (admin only)."""
     user = UserService.get_user_by_id(db, target_user_id)
@@ -78,10 +78,12 @@ async def create_user(
     request: Request,
     user_data: UserCreate,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Create a new user (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     try:
         user = UserService.create_user(
@@ -101,8 +103,8 @@ async def create_user(
         db=db,
         action="create_user",
         actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="user",
         object_id=user.id,
         request_ip=request.client.host if request.client else None,
@@ -121,10 +123,12 @@ async def update_user(
     target_user_id: str,
     user_data: UserUpdate,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Update a user (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     user = UserService.update_user(
         db=db,
@@ -139,8 +143,8 @@ async def update_user(
         db=db,
         action="update_user",
         actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="user",
         object_id=target_user_id,
         request_ip=request.client.host if request.client else None,
@@ -158,10 +162,12 @@ async def delete_user(
     request: Request,
     target_user_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Delete a user (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     # Prevent deleting yourself
     if target_user_id == user_id:
@@ -174,8 +180,8 @@ async def delete_user(
         db=db,
         action="delete_user",
         actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="user",
         object_id=target_user_id,
         request_ip=request.client.host if request.client else None,
@@ -192,24 +198,22 @@ async def enable_user(
     request: Request,
     target_user_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Enable a user (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     user = UserService.toggle_user_status(db, target_user_id)
-
-    if user.status != "enabled":
-        # Actually it was toggled, so if we want to enable, we need to check
-        pass
 
     # Log audit
     AuditService.log(
         db=db,
         action="enable_user",
         actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="user",
         object_id=target_user_id,
         request_ip=request.client.host if request.client else None,
@@ -227,10 +231,12 @@ async def disable_user(
     request: Request,
     target_user_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Disable a user (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     # Prevent disabling yourself
     if target_user_id == user_id:
@@ -243,8 +249,8 @@ async def disable_user(
         db=db,
         action="disable_user",
         actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="user",
         object_id=target_user_id,
         request_ip=request.client.host if request.client else None,
@@ -254,34 +260,4 @@ async def disable_user(
         code=0,
         message="用户已禁用",
         data=user_to_dict(user),
-    )
-
-
-@router.post("/{target_user_id}/reset-password", response_model=ResponseData)
-async def reset_password(
-    request: Request,
-    target_user_id: str,
-    db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
-):
-    """Reset user password (admin only)."""
-    admin = AuthService.get_user_by_id(db, user_id)
-
-    new_password = UserService.reset_password(db, target_user_id)
-
-    # Log audit
-    AuditService.log(
-        db=db,
-        action="reset_password",
-        actor_id=user_id,
-        actor_account=admin.account,
-        actor_role=admin.role,
-        object_type="user",
-        object_id=target_user_id,
-        request_ip=request.client.host if request.client else None,
-    )
-
-    return ResponseData(
-        code=0,
-        message=f"密码已重置为: {new_password}",
     )

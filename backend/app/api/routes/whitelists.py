@@ -42,7 +42,7 @@ async def get_whitelists(
     target_type: str = None,
     status: str = None,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Get whitelist entries (admin only)."""
     whitelists, total = WhitelistService.get_whitelists(
@@ -70,7 +70,7 @@ async def get_whitelists(
 async def get_whitelist(
     whitelist_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Get whitelist detail (admin only)."""
     whitelist = WhitelistService.get_whitelist_by_id(db, whitelist_id)
@@ -86,10 +86,12 @@ async def create_whitelist(
     request: Request,
     whitelist_data: WhitelistCreate,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Create a new whitelist entry (admin only)."""
-    user = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     whitelist = WhitelistService.create_whitelist(
         db=db,
@@ -105,8 +107,8 @@ async def create_whitelist(
         db=db,
         action="create_whitelist",
         actor_id=user_id,
-        actor_account=user.account,
-        actor_role=user.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="whitelist",
         object_id=whitelist.id,
         request_ip=request.client.host if request.client else None,
@@ -125,10 +127,12 @@ async def update_whitelist(
     whitelist_id: str,
     whitelist_data: WhitelistUpdate,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Update a whitelist entry (admin only)."""
-    user = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     whitelist = WhitelistService.update_whitelist(
         db=db,
@@ -147,8 +151,8 @@ async def update_whitelist(
         db=db,
         action="update_whitelist",
         actor_id=user_id,
-        actor_account=user.account,
-        actor_role=user.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="whitelist",
         object_id=whitelist_id,
         request_ip=request.client.host if request.client else None,
@@ -166,10 +170,12 @@ async def delete_whitelist(
     request: Request,
     whitelist_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Delete a whitelist entry (admin only)."""
-    user = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     success = WhitelistService.delete_whitelist(db, whitelist_id)
 
@@ -181,8 +187,8 @@ async def delete_whitelist(
         db=db,
         action="delete_whitelist",
         actor_id=user_id,
-        actor_account=user.account,
-        actor_role=user.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="whitelist",
         object_id=whitelist_id,
         request_ip=request.client.host if request.client else None,
@@ -199,10 +205,12 @@ async def enable_whitelist(
     request: Request,
     whitelist_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Enable a whitelist entry (admin only)."""
-    user = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     whitelist = WhitelistService.toggle_whitelist(db, whitelist_id)
 
@@ -214,8 +222,8 @@ async def enable_whitelist(
         db=db,
         action="enable_whitelist",
         actor_id=user_id,
-        actor_account=user.account,
-        actor_role=user.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="whitelist",
         object_id=whitelist_id,
         request_ip=request.client.host if request.client else None,
@@ -233,10 +241,12 @@ async def disable_whitelist(
     request: Request,
     whitelist_id: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(require_admin),
+    current_user: dict = Depends(require_admin),
 ):
     """Disable a whitelist entry (admin only)."""
-    user = AuthService.get_user_by_id(db, user_id)
+    user_id = current_user.get("sub")
+    user_account = current_user.get("account")
+    user_role = current_user.get("role")
 
     whitelist = WhitelistService.toggle_whitelist(db, whitelist_id)
 
@@ -248,8 +258,8 @@ async def disable_whitelist(
         db=db,
         action="disable_whitelist",
         actor_id=user_id,
-        actor_account=user.account,
-        actor_role=user.role,
+        actor_account=user_account,
+        actor_role=user_role,
         object_type="whitelist",
         object_id=whitelist_id,
         request_ip=request.client.host if request.client else None,

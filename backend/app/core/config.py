@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     runner_node_id: str = "local-dev"
     task_queue_backend: str = "in_memory"
     lock_backend: str = "redis"
-    event_bus_backend: str = "redis"
+    event_bus_backend: str = "in_memory"
 
     # Storage
     artifact_retention_days: int = 30

@@ -96,45 +96,43 @@ class WhitelistService:
         Check if target is in whitelist.
         Returns (allowed, matched_whitelist_id).
         """
-        # Try URL match first
-        url_whitelists = db.query(Whitelist).filter(
-            Whitelist.target_type == WhitelistType.URL.value,
+        # Normalize the target
+        normalized_target = target.lower().strip()
+
+        # Get all enabled whitelists
+        all_whitelists = db.query(Whitelist).filter(
             Whitelist.status == WhitelistStatus.ENABLED.value,
         ).all()
 
-        normalized_target = target.lower().strip()
-        for wl in url_whitelists:
-            # Direct match
-            if normalized_target == wl.target_normalized.lower():
-                return True, wl.id
-            # Domain match
-            if wl.target_type == WhitelistType.DOMAIN.value:
+        for wl in all_whitelists:
+            wl_normalized = wl.target_normalized.lower() if wl.target_normalized else ""
+
+            if wl.target_type == WhitelistType.URL.value:
+                # URL whitelist: exact match or domain match
+                if normalized_target == wl_normalized:
+                    return True, wl.id
+                # Also match if domain matches
                 target_domain = WhitelistService.extract_domain_from_url(normalized_target)
-                wl_domain = wl.target_normalized.lower()
+                wl_domain = wl_normalized.split('://')[-1] if '://' in wl_normalized else wl_normalized
                 if target_domain == wl_domain or target_domain.endswith('.' + wl_domain):
                     return True, wl.id
 
-        # Try domain whitelist
-        domain_whitelists = db.query(Whitelist).filter(
-            Whitelist.target_type == WhitelistType.DOMAIN.value,
-            Whitelist.status == WhitelistStatus.ENABLED.value,
-        ).all()
+            elif wl.target_type == WhitelistType.DOMAIN.value:
+                # Domain whitelist: exact match or subdomain match
+                target_domain = WhitelistService.extract_domain_from_url(normalized_target)
+                wl_domain = wl_normalized
+                if target_domain == wl_domain or target_domain.endswith('.' + wl_domain):
+                    return True, wl.id
 
-        target_domain = WhitelistService.extract_domain_from_url(normalized_target)
-        for wl in domain_whitelists:
-            wl_domain = wl.target_normalized.lower()
-            if target_domain == wl_domain or target_domain.endswith('.' + wl_domain):
-                return True, wl.id
+            elif wl.target_type == WhitelistType.IP.value:
+                # IP whitelist: exact match
+                if normalized_target == wl_normalized:
+                    return True, wl.id
 
-        # Try IP whitelist
-        ip_whitelists = db.query(Whitelist).filter(
-            Whitelist.target_type == WhitelistType.IP.value,
-            Whitelist.status == WhitelistStatus.ENABLED.value,
-        ).all()
-
-        for wl in ip_whitelists:
-            if normalized_target == wl.target_normalized.lower():
-                return True, wl.id
+            elif wl.target_type == WhitelistType.REPO.value:
+                # Repo whitelist: exact match
+                if normalized_target == wl_normalized:
+                    return True, wl.id
 
         return False, None
 
@@ -251,3 +249,15 @@ class WhitelistService:
     def get_whitelist_by_id(db: Session, whitelist_id: str) -> Whitelist:
         """Get whitelist by ID."""
         return db.query(Whitelist).filter(Whitelist.id == whitelist_id).first()
+
+    @staticmethod
+    def check_whitelist_match(target: str) -> bool:
+        """Check if target matches any whitelist entry.
+
+        This is a convenience method that uses a database session.
+        Returns True if target is allowed.
+        """
+        from app.db.session import get_db_context
+        with get_db_context() as db:
+            allowed, _ = WhitelistService.check_whitelist(db, target)
+            return allowed

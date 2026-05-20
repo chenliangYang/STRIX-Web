@@ -30,7 +30,6 @@ class Result(Base):
         nullable=False,
         unique=True,
     )
-    project_name: Mapped[str] = mapped_column(String(128), nullable=False)
     target: Mapped[str] = mapped_column(Text, nullable=False)
     scan_mode: Mapped[str] = mapped_column(String(32), nullable=False)
     interactive: Mapped[bool] = mapped_column(default=False)

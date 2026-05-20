@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import health, auth, tasks, whitelists, dashboard, users, audit_logs
+from app.api.routes import health, auth, tasks, whitelists, dashboard, users, audit_logs, runs, websockets, results
 from app.core.config import get_settings
 from app.core.errors import StrixWebException
 from app.core.logging import setup_logging
@@ -73,10 +73,14 @@ async def strix_web_exception_handler(
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(tasks.router, prefix=settings.api_prefix)
+app.include_router(runs.router, prefix=settings.api_prefix)
+app.include_router(runs.task_runs_router, prefix=settings.api_prefix)
 app.include_router(whitelists.router, prefix=settings.api_prefix)
 app.include_router(dashboard.router, prefix=settings.api_prefix)
 app.include_router(users.router, prefix=settings.api_prefix)
 app.include_router(audit_logs.router, prefix=settings.api_prefix)
+app.include_router(results.router, prefix=settings.api_prefix)
+app.include_router(websockets.router)  # No prefix for WebSocket routes
 
 
 @app.get("/")

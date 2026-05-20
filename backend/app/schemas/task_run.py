@@ -1,8 +1,9 @@
 """Task run schemas."""
 
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class RunItem(BaseModel):
@@ -12,17 +13,35 @@ class RunItem(BaseModel):
     task_id: str
     run_no: int
     scan_mode: str
-    interactive: bool
+    interactive: bool | int
     status: str
     pid: int | None = None
     runner_node_id: str | None = None
     exit_code: int | None = None
-    run_dir: str
+    run_dir: str | None = None
     started_at: datetime | None = None
     ended_at: datetime | None = None
     error_message: str | None = None
     created_by: str
     created_at: datetime
+
+    @field_validator('interactive', mode='before')
+    @classmethod
+    def convert_interactive(cls, v: Any) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return bool(v)
+        if isinstance(v, str):
+            return v.lower() in ('true', '1', 'yes')
+        return v
+
+    @field_validator('run_dir', mode='before')
+    @classmethod
+    def convert_run_dir(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        return str(v) if v else None
 
 
 class RunDetail(RunItem):
@@ -32,7 +51,47 @@ class RunDetail(RunItem):
     updated_at: datetime | None = None
 
 
-class RunEvent(BaseModel):
+class TaskRunResponse(BaseModel):
+    """TaskRun response schema."""
+
+    id: str
+    task_id: str
+    run_no: int
+    scan_mode: str
+    interactive: bool | int
+    status: str
+    pid: int | None = None
+    runner_node_id: str | None = None
+    exit_code: int | None = None
+    run_dir: str | None = None
+    strix_run_dir: str | None = None
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
+    error_message: str | None = None
+    created_by: str
+    created_at: datetime
+    updated_at: datetime | None = None
+
+    @field_validator('interactive', mode='before')
+    @classmethod
+    def convert_interactive(cls, v: Any) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return bool(v)
+        if isinstance(v, str):
+            return v.lower() in ('true', '1', 'yes')
+        return v
+
+    @field_validator('run_dir', mode='before')
+    @classmethod
+    def convert_run_dir(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        return str(v) if v else None
+
+
+class RunEventSchema(BaseModel):
     """Run event schema."""
 
     id: str
@@ -44,6 +103,9 @@ class RunEvent(BaseModel):
     source_file: str | None = None
     source_offset: int | None = None
     created_at: datetime
+
+
+RunEventResponse = RunEventSchema
 
 
 class ArtifactItem(BaseModel):

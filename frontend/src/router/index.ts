@@ -31,6 +31,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '任务管理' },
       },
       {
+        path: 'tasks/:id/runs',
+        name: 'TaskRuns',
+        component: () => import('@/pages/tasks/TaskRuns.vue'),
+        meta: { title: '运行记录' },
+      },
+      {
         path: 'tasks/:id/runs/:runId',
         name: 'RunDetail',
         component: () => import('@/pages/tasks/RunDetail.vue'),

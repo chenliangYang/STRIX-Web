@@ -26,5 +26,5 @@ export const getResultVulnerabilities = (resultId: string, params?: { page?: num
 }
 
 export const getVulnerabilityMarkdown = (vulnId: string) => {
-  return http.get(`/vulnerabilities/${vulnId}/markdown`)
+  return http.get(`/results/vulnerabilities/${vulnId}/markdown`)
 }

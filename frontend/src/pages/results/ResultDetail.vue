@@ -9,8 +9,8 @@
       </template>
 
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="项目名称">
-          {{ resultDetail?.project_name || '-' }}
+        <el-descriptions-item label="任务名称">
+          {{ resultDetail?.task_name || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="风险等级">
           <el-tag :type="getRiskType(resultDetail?.risk_level)">
@@ -203,9 +203,12 @@ const loadVulnerabilities = async () => {
 
 const viewMarkdown = async (vuln: Vulnerability) => {
   try {
-    const response = await http.get(`/vulnerabilities/${vuln.id}/markdown`) as any
+    const response = await http.get(`/results/vulnerabilities/${vuln.id}/markdown`) as any
     if (response.code === 0) {
-      currentMarkdown.value = response.data
+      currentMarkdown.value = {
+        ...response.data,
+        markdown: response.data.content  // API returns 'content', frontend expects 'markdown'
+      }
       showMarkdownDialog.value = true
     } else {
       ElMessage.error('获取漏洞详情失败')

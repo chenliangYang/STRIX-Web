@@ -13,6 +13,7 @@ from app.schemas.task import (
     ExecuteResponse,
 )
 from app.services.task_service import TaskService
+from app.services.run_service import RunService
 from app.services.audit_service import AuditService
 from app.services.whitelist_service import WhitelistService
 from app.core.errors import WhitelistNotMatchedException, StrixWebException
@@ -243,10 +244,7 @@ async def execute_task(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
-    """
-    Execute a task.
-    Note: This creates a task_run but doesn't actually run STRIX yet.
-    """
+    """Execute a task."""
     from app.services.auth_service import AuthService
     user = AuthService.get_user_by_id(db, user_id)
     is_admin = user.role == "admin"
@@ -257,31 +255,24 @@ async def execute_task(
     if not is_admin and task.created_by != user_id:
         raise StrixWebException("没有权限执行该任务", code=40300)
 
-    # Check whitelist (skip for MVP)
-    # allowed, matched_id = WhitelistService.check_whitelist(db, task.target)
-    # if not allowed:
-    #     raise WhitelistNotMatchedException()
+    # Check if target is empty
+    if not task.target or not task.target.strip():
+        raise StrixWebException("目标地址不能为空", code=40000)
 
-    # For MVP, just return a mock run_id
-    run_id = f"mock-run-{task_id}"
+    # Check whitelist
+    allowed, matched_id = WhitelistService.check_whitelist(db, task.target)
+    if not allowed:
+        raise WhitelistNotMatchedException("目标不在白名单中")
 
-    # Log audit
-    AuditService.log_task_action(
-        db=db,
-        action="execute_task",
-        task_id=task_id,
-        user_id=user_id,
-        account=user.account,
-        role=user.role,
-        request_ip=request.client.host if request.client else None,
-    )
+    # Execute task via RunService
+    run = RunService.execute_task(db, task_id, user_id)
 
     return ResponseData(
         code=0,
-        message="任务已加入执行队列",
+        message="任务已开始执行",
         data=ExecuteResponse(
-            run_id=run_id,
-            status="queued",
+            run_id=run.id,
+            status=run.status,
         ),
     )
 
@@ -303,6 +294,11 @@ async def stop_task(
     # Check access
     if not is_admin and task.created_by != user_id:
         raise StrixWebException("没有权限停止该任务", code=40300)
+
+    # Get the latest running task run
+    latest_run = RunService.get_latest_run(db, task_id)
+    if latest_run and latest_run.status == "running":
+        RunService.stop_task(db, latest_run.id, user_id)
 
     # Log audit
     AuditService.log_task_action(

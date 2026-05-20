@@ -7,8 +7,8 @@
 
       <div class="filters">
         <el-input
-          v-model="filters.projectName"
-          placeholder="项目名称"
+          v-model="filters.taskName"
+          placeholder="任务名称"
           style="width: 200px"
           clearable
         />
@@ -37,7 +37,7 @@
       </div>
 
       <el-table :data="results" v-loading="loading" style="margin-top: 20px">
-        <el-table-column prop="project_name" label="项目名称" min-width="150" />
+        <el-table-column prop="task_name" label="任务名称" min-width="150" />
         <el-table-column prop="target" label="目标" min-width="200" show-overflow-tooltip />
         <el-table-column prop="scan_mode" label="扫描模式" width="100" />
         <el-table-column prop="status" label="状态" width="100">
@@ -98,7 +98,7 @@ const results = ref<Result[]>([])
 const loading = ref(false)
 
 const filters = reactive({
-  projectName: '',
+  taskName: '',
   status: '',
   riskLevel: '',
 })

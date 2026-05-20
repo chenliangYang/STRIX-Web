@@ -80,7 +80,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="180" />
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="['not_started', 'failed', 'stopped'].includes(row.status)"
@@ -97,6 +97,14 @@
               @click="handleStop(row)"
             >
               停止
+            </el-button>
+            <el-button
+              v-if="row.status === 'completed' || row.status === 'failed' || row.status === 'stopped'"
+              type="success"
+              size="small"
+              @click="viewRunDetail(row)"
+            >
+              查看详情
             </el-button>
             <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
             <el-button
@@ -166,10 +174,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getTasks, createTask, updateTask, deleteTask, executeTask, stopTask } from '@/api/tasks'
+
+const router = useRouter()
 
 const tasks = ref<any[]>([])
 const loading = ref(false)
@@ -177,6 +188,10 @@ const showDialog = ref(false)
 const editingTask = ref<any>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
+
+// Polling for running tasks
+const runningTaskIds = ref<Set<string>>(new Set())
+let pollTimer: ReturnType<typeof setInterval> | null = null
 
 const filters = reactive({
   name: '',
@@ -274,11 +289,72 @@ const loadTasks = async () => {
     if (response.code === 0) {
       tasks.value = response.data?.items || []
       pagination.total = response.data?.total || 0
+
+      // Check for running tasks and update polling set
+      const newRunningIds = new Set<string>()
+      for (const task of tasks.value) {
+        if (task.status === 'running') {
+          newRunningIds.add(task.id)
+        }
+      }
+      runningTaskIds.value = newRunningIds
     }
   } catch (error) {
     console.error('Failed to load tasks:', error)
   } finally {
     loading.value = false
+  }
+}
+
+// Start polling if there are running tasks
+const startPolling = () => {
+  if (pollTimer) return // Already polling
+
+  // Poll every 2 seconds for running tasks
+  pollTimer = setInterval(async () => {
+    if (runningTaskIds.value.size === 0) {
+      if (pollTimer) {
+        clearInterval(pollTimer)
+        pollTimer = null
+      }
+      return
+    }
+
+    try {
+      // Only fetch running tasks
+      const params = {
+        page: 1,
+        pageSize: 100,
+        status: 'running',
+      }
+      const response = await getTasks(params) as any
+      if (response.code === 0 && response.data?.items) {
+        const updatedTasks = response.data.items
+
+        // Update tasks in the list
+        for (const updated of updatedTasks) {
+          const idx = tasks.value.findIndex(t => t.id === updated.id)
+          if (idx !== -1) {
+            tasks.value[idx] = { ...tasks.value[idx], ...updated }
+          }
+
+          // Remove from running set if no longer running
+          if (updated.status !== 'running') {
+            runningTaskIds.value.delete(updated.id)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Polling error:', error)
+    }
+  }, 2000)
+}
+
+// Stop polling
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
   }
 }
 
@@ -350,12 +426,17 @@ const handleExecute = async (task: any) => {
     if (response.code === 0) {
       ElMessage.success('任务已开始执行')
       loadTasks()
+      startPolling()
     } else {
       ElMessage.error(response.message || '执行失败')
     }
   } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '执行失败')
   }
+}
+
+const viewRunDetail = (task: any) => {
+  router.push(`/tasks/${task.id}/runs`)
 }
 
 const handleStop = async (task: any) => {
@@ -392,6 +473,11 @@ const handleDelete = (task: any) => {
 
 onMounted(() => {
   loadTasks()
+  startPolling()
+})
+
+onUnmounted(() => {
+  stopPolling()
 })
 </script>
 
